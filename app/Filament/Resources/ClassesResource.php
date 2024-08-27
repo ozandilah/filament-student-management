@@ -3,17 +3,17 @@
 namespace App\Filament\Resources;
 
 use Filament\Forms;
-use Filament\Forms\Components\TextInput;
 use Filament\Tables;
 use App\Models\Classes;
 use Filament\Forms\Form;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\ClassesResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\ClassesResource\RelationManagers;
+use Filament\Tables\Columns\TextColumn;
 
 class ClassesResource extends Resource
 {
@@ -33,7 +33,7 @@ class ClassesResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                 TextColumn::make('name')
             ])
             ->filters([
                 //
