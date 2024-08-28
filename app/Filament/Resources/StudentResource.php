@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\StudentResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\StudentResource\RelationManagers;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 
@@ -25,7 +27,17 @@ class StudentResource extends Resource
     {
         return $form
             ->schema([
-                //
+
+                Select::make('class_id')
+                ->relationship(name:'class', titleAttribute:'name',modifyQueryUsing:fn(Builder $query) => $query->orderBy('id','asc')),
+                Select::make('section_id')
+                ->relationship(name:'section', titleAttribute:'name',modifyQueryUsing:fn(Builder $query) => $query->orderBy('id','asc')),
+                TextInput::make('name')
+                    ->autofocus()
+                    ->required(),
+                TextInput::make('email')
+                    ->unique()
+                    ->required()
             ]);
     }
 
