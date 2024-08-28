@@ -12,8 +12,10 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\StudentResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\StudentResource\RelationManagers;
+use App\Models\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Get;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 
@@ -29,9 +31,19 @@ class StudentResource extends Resource
             ->schema([
 
                 Select::make('class_id')
+                ->live()
                 ->relationship(name:'class', titleAttribute:'name',modifyQueryUsing:fn(Builder $query) => $query->orderBy('id','asc')),
+
                 Select::make('section_id')
-                ->relationship(name:'section', titleAttribute:'name',modifyQueryUsing:fn(Builder $query) => $query->orderBy('id','asc')),
+                ->label('Section')
+                ->options(function(Get $get){
+                    $classId = $get('class_id');
+                    //Menerapkan dropdown bertingkat dimana section akan muncul berdasarkan id class
+                   if($classId){
+                    return Section::where('class_id', $classId)->get()->pluck('name','id')->toArray();
+                   }
+                }),
+
                 TextInput::make('name')
                     ->autofocus()
                     ->required(),
