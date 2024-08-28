@@ -2,28 +2,35 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\StudentsExport;
 use Filament\Forms;
 use Filament\Tables;
+use App\Models\Section;
 use App\Models\Student;
+use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\StudentResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\StudentResource\RelationManagers;
-use App\Models\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Get;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Columns\TextColumn;
+use App\Models\Classes;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Collection;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentResource extends Resource
 {
     protected static ?string $model = Student::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-plus';
 
     public static function form(Form $form): Form
     {
@@ -35,6 +42,7 @@ class StudentResource extends Resource
                 ->relationship(name:'class', titleAttribute:'name',modifyQueryUsing:fn(Builder $query) => $query->orderBy('id','asc')),
 
                 Select::make('section_id')
+                ->searchable()
                 ->label('Section')
                 ->options(function(Get $get){
                     $classId = $get('class_id');
@@ -49,6 +57,9 @@ class StudentResource extends Resource
                     ->required(),
                 TextInput::make('email')
                     ->unique()
+                    ->required(),
+                TextInput::make('password')
+                    ->password()
                     ->required()
             ]);
     }
@@ -84,14 +95,56 @@ class StudentResource extends Resource
                     ->badge()
             ])
             ->filters([
-                //
+                Filter::make('class-section-filter')
+                    ->form(
+                        [
+                            Select::make('class_id')
+                                ->label('Filter By Class')
+                                ->placeholder('Select a Class')
+                                ->options(Classes::pluck('name','id')->toArray()),
+                            Select::make('section_id')
+                                ->label('Filter By Section')
+                                ->placeholder('Select a Section')
+                                ->options(function(Get $get) {
+                                    $classId = $get('class_id');
+                                    if($classId)
+                                    {
+                                        return Section::where('class_id', $classId)
+                                                ->pluck('name','id')
+                                                ->toArray();
+                                    }
+                                })
+                        ]
+                    )
+                    ->query(function(Builder $query, array $data): Builder{
+                        return $query->when($data['class_id'], function ($query) use ($data){
+                            return $query->where('class_id',$data['class_id']);
+                        })->when($data['section_id'], function($query) use ($data) {
+                            return $query->where('section_id',$data['section_id']);
+                        });
+                    })
             ])
             ->actions([
+                // Action::make('downloadPdf')
+                //     ->url(function(Student $student) {
+                //         return route('student.invoice.generate', $student);
+                //     }),
+                // Action::make('qrCode')
+                //     ->url(function(Student $record) {
+                //         return static::getUrl('qrCode', ['record' => $record]);
+                //     }),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    BulkAction::make('export')
+                    ->label('Export to Excel')
+                    ->icon('heroicon-o-printer')
+                    ->action(function(Collection $records) {
+                        return Excel::download(new StudentsExport($records), 'student.xlsx');
+                    })
+
                 ]),
             ]);
     }
