@@ -20,7 +20,9 @@ use App\Filament\Resources\SectionResource\RelationManagers;
 class SectionResource extends Resource
 {
     protected static ?string $model = Section::class;
-
+    protected static ?string $modelLabel = 'Sections';
+    protected static ?string $navigationParentItem = 'Classes';
+    protected static ?string $navigationGroup = 'Academic Management';
     protected static ?string $navigationIcon = 'heroicon-o-square-2-stack';
 
     public static function form(Form $form): Form
@@ -53,7 +55,11 @@ class SectionResource extends Resource
                     } else {
                         return 'secondary';
                     }
-                })
+                }),
+                TextColumn::make('students.name'),
+                TextColumn::make('students_count')
+                    ->counts('students')
+                    ->badge()
             ])
             ->filters([
                 //

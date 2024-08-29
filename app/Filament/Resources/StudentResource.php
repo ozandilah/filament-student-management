@@ -2,35 +2,43 @@
 
 namespace App\Filament\Resources;
 
-use App\Exports\StudentsExport;
 use Filament\Forms;
 use Filament\Tables;
+use App\Models\Classes;
 use App\Models\Section;
 use App\Models\Student;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Exports\StudentsExport;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
+use Maatwebsite\Excel\Facades\Excel;
 use Filament\Forms\Components\Select;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Resources\StudentResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\StudentResource\RelationManagers;
-use App\Models\Classes;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Filters\Filter;
-use Illuminate\Database\Eloquent\Collection;
-use Maatwebsite\Excel\Facades\Excel;
 
 class StudentResource extends Resource
 {
     protected static ?string $model = Student::class;
 
+    protected static ?string $modelLabel = 'Students';
+    protected static ?string $navigationGroup = 'Academic Management';
     protected static ?string $navigationIcon = 'heroicon-o-user-plus';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::$model::count();
+    }
+
 
     public static function form(Form $form): Form
     {

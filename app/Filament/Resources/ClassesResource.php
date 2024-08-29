@@ -18,8 +18,11 @@ use App\Filament\Resources\ClassesResource\RelationManagers;
 class ClassesResource extends Resource
 {
     protected static ?string $model = Classes::class;
-
+    protected static ?string $modelLabel = 'Classes';
+    protected static ?string $navigationGroup = 'Academic Management';
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
+
 
     public static function form(Form $form): Form
     {
@@ -33,7 +36,12 @@ class ClassesResource extends Resource
     {
         return $table
             ->columns([
-                 TextColumn::make('name')
+                 TextColumn::make('name'),
+                 TextColumn::make('sections.name')
+                            ->badge(),
+                TextColumn::make('students_count')
+                        ->counts('students')
+                        ->badge()
             ])
             ->filters([
                 //
