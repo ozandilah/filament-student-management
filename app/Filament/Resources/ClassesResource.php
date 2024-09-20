@@ -29,6 +29,8 @@ class ClassesResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name')
+                    ->required()
+                    ->unique(ignoreRecord: true)
             ]);
     }
 
@@ -36,12 +38,12 @@ class ClassesResource extends Resource
     {
         return $table
             ->columns([
-                 TextColumn::make('name'),
-                 TextColumn::make('sections.name')
-                            ->badge(),
+                TextColumn::make('name'),
+                TextColumn::make('sections.name')
+                    ->badge(),
                 TextColumn::make('students_count')
-                        ->counts('students')
-                        ->badge()
+                    ->counts('students')
+                    ->badge()
             ])
             ->filters([
                 //
