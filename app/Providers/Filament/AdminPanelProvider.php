@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login as AuthLogin;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
@@ -28,7 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('')
-            ->login()
+            ->login(AuthLogin::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
